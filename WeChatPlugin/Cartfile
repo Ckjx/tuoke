@@ -1,0 +1,4 @@
+github "facebook/SocketRocket"
+
+$(SRCROOT)/Carthage/Build/Mac/SocketIO.framework
+$(SRCROOT)/Carthage/Build/Mac/Starscream.framework

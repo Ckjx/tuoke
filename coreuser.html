@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>管理中心</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta content="Coderthemes" name="author" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="white">
+    <link rel="stylesheet" type="text/css" href="./plugins/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="./plugins/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" type="text/css" href="./plugins/style.css">
+    <link rel="stylesheet" type="text/css" href="./plugins/toastr/jquery.toast.min.css">
+    <script src="./plugins/jquery-3.1.1.min.js"></script>
+    <script src="./plugins/bootstrap.min.js"></script>
+    <script src="./plugins/vue.min.js"></script>
+    <script src="./plugins/async.min.js"></script>
+    <script src="ckfk.js"></script>
+    <script src="plugins/uuid.js"></script>
+</head>
+<style>
+    .table-va tr td {
+        vertical-align: middle;
+    }
+    thead tr th{
+        font-size: 13px;
+        padding: 10px 0 !important;
+    }
+    .tropen{
+
+    }
+    .table td{
+        border-top: none;
+    }
+    .top-nav-ck{
+        display: flex;
+        justify-content: space-between;
+        height: 60px;
+        align-items: center;
+    }
+    .top-nav-ck p:nth-child(1){
+        font-size: 16px;
+    }
+    .top-nav-ck p:nth-child(2){
+        font-size: 14px;
+    }
+    .order-hrader-nav p{
+        cursor: pointer;
+    }
+    .order-hrader-nav p:hover{
+        color: #37aee8;
+        font-weight: bold;
+    }
+    .order-hrader-nav .active{
+        color: #37aee8;
+        font-weight: bold;
+    }
+
+</style>
+<body>
+<div class="container-fluid" id="vuedata">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box top-nav-ck">
+                <p class="page-title">管理中心</p>
+                <p class="page-title" style="cursor: pointer" onclick="showmodal()">新增授权</p>
+            </div>
+        </div>
+        <!--<div class="col-1">-->
+            <!--<div class="card-box order-hrader-nav">-->
+                <!--<p data-type="101">全部订单&nbsp;&nbsp;<small>0</small></p>-->
+                <!--<p data-type="1">待付款&nbsp;&nbsp;<small>0</small></p>-->
+                <!--<p data-type="9">已支付&nbsp;&nbsp;<small>0</small></p>-->
+            <!--</div>-->
+        <!--</div>-->
+        <div class="modal fade" tabindex="-1" id="indexOrderPrice" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">操作授权</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal" id="formaddress">
+
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">站点名称</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="webname" :value="editOrder.webname" placeholder="">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">订单号</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="weshoporder" :value="editOrder.weshoporder"  placeholder="">
+                                    </div>
+                                    <small class="form-text text-muted">订单号</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">域名</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="domain" :value="editOrder.domain"  placeholder="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">ip</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="ip" :value="editOrder.ip"  placeholder="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">限制设备数量</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" name="devcount"  :value="editOrder.devcount"  placeholder="">
+                                    </div>
+                                    <small class="form-text text-muted">0为不限制次数和不开启,最大999</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">连接密钥</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="clinekey" :value="editOrder.clinekey" :disabled="editOrder.clinekey ? true:false">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-dark waves-effect waves-light" type="button" :disabled="editOrder.clinekey ? true:false" onclick="caretuuid()">生成密钥</button>
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted">手动生成用户加密连接密钥</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">图片数量</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" name="sendimg" :value="editOrder.sendimg"  placeholder="">
+                                    </div>
+                                    <small class="form-text text-muted">0为不开启,最大9999</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">名片数量</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" name="sendcard" :value="editOrder.sendcard"  placeholder="">
+                                    </div>
+                                    <small class="form-text text-muted">0为不开启,最大9999</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">驻留进程(流量模式)</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" name="process" :value="editOrder.process"  placeholder="">
+                                    </div>
+                                    <small class="form-text text-muted">0为不开启,驻留进程数量，最大99</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">扫码确认</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <select class="form-control" name="scan">
+                                            <option value="1" :selected="(editOrder.scan == '' || editOrder.scan == 1) ? true:false">关闭</option>
+                                            <option value="2" :selected="editOrder.scan == 2 ? true:false">开启</option>
+                                        </select>
+                                    </div>
+                                    <small class="form-text text-muted">用户扫码后，得到用户确认才可以发送</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">最大发送人数(含群)</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" :value="editOrder.maxsendcount"  name="maxsendcount" placeholder="">
+                                    </div>
+                                    <small class="form-text text-muted">0为不限制 最大9999</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">到期时间</label>
+                                <div class="col-10">
+                                    <div class="input-group date form_datetime" data-date="">
+                                        <input type="text" class="form-control" value="" name="endtime" placeholder="" :value="editOrder.endtime ? tools.dataToStr(editOrder.endtime):tools.dataToStr(new Date()/1000)" >
+                                        <div class="input-group-append">
+                                            <button class="btn btn-dark waves-effect waves-light input-group-addon" type="button"><span class="glyphicon glyphicon-th">选取时间</span></button>
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted">到期时间</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">费用</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" name="cost" placeholder="" :value="editOrder.cost" >
+                                    </div>
+                                    <small class="form-text text-muted">费用金额</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">发送确认</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <select class="form-control" name="sendok">
+                                            <option value="1" :selected="(editOrder.sendok == '' || editOrder.sendok == 1) ? true:false">关闭</option>
+                                            <option value="2" :selected="editOrder.sendok == 2 ? true:false">启用</option>
+                                        </select>
+                                    </div>
+                                    <small class="form-text text-muted">如果直接关闭，不管用户续费多久，都直接关闭</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-2 col-form-label">状态</label>
+                                <div class="col-10">
+                                    <div class="input-group">
+                                        <select class="form-control" name="status">
+                                            <option value="1" :selected="(editOrder.status == '' || editOrder.status == 1) ? true:false">开启</option>
+                                            <option value="2" :selected="(editOrder.status == '' || editOrder.status == 2) ? true:false">关闭</option>
+                                        </select>
+                                    </div>
+                                    <small class="form-text text-muted">如果直接关闭，不管用户续费多久，都直接关闭</small>
+                                </div>
+                            </div>
+
+
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary waves-effect waves-light" onclick="postform()">提交</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card-box table-responsive">
+                <table id="datatable" class="table table-striped table-sm">
+                    <thead>
+                    <tr>
+                        <th>站点名称</th>
+                        <th>域名</th>
+                        <th>IP</th>
+                        <th>限制客户端</th>
+                        <th>图片(Max)</th>
+                        <th>名片(Max)</th>
+                        <th>驻留进程(Max)</th>
+                        <th>用户扫码确认</th>
+                        <th>最大发送人数</th>
+                        <th>到期时间</th>
+                        <th>费用</th>
+                        <th>发送确认</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody class="table-va">
+                    <tr v-for="(rows,index) in orderList">
+
+                        <td>
+                            <h5 class="m-0 font-weight-normal">{{rows['webname']}}</h5>
+                            <p class="mb-0 text-muted" style="cursor: pointer"><small>订单号:{{rows['weshoporder']}}</small></p>
+                            <p class="mb-0 text-muted" style="cursor: pointer"><small>连接密钥:{{rows['clinekey']}}</small></p>
+                        </td>
+                        <td>{{rows['domain']}}</td>
+                        <td>{{rows['ip']}}</td>
+                        <td>{{rows['devcount']}}个</td>
+                        <td>{{rows['sendimg']}}</td>
+                        <td>{{rows['sendcard']}}</td>
+                        <td>{{rows['process']}}个</td>
+                        <td>{{rows['scan'] == 1 ? '不需要':'需要'}}</td>
+                        <td>{{rows['maxsendcount']}}</td>
+                        <td>{{tools.dataToStr(rows['endtime'])}}</td>
+                        <td>￥{{rows['cost']}}</td>
+                        <td>{{rows['sendok'] ==1 ? '关闭':'启用'}}</td>
+                        <td>{{rows['status'] ==1 ? '正常':'关闭'}}</td>
+                        <td>
+                            <button type="button" class="btn btn-warning btn-sm waves-light waves-effect diypriceBut" onclick="Edit(event)" :data-index="index"  :data-id="rows.id" >编辑</button>
+                            <button type="button" class="btn btn-primary btn-sm waves-light waves-effect diypriceBut" onclick="Renewal(event)" :data-index="index" data-type="add" :data-id="rows.id">续费</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="./plugins/jquery.dataTables.min.js"></script>
+<script src="./plugins/dataTables.bootstrap4.min.js"></script>
+<script src="./plugins/toastr/jquery.toast.min.js"></script>
+<link rel="stylesheet" href="./plugins/boot-time/bootstrap-datetimepicker.min.css">
+
+<script src="./plugins/boot-time/bootstrap-datetimepicker.min.js"></script>
+<script src="./plugins/boot-time/bootstrap-datetimepicker.zh-CN.js"></script>
+
+<!--<script src="{SMILE_TITAN_LEASE_STATIC}ck_v3/plugins/toastr/jquery.toastr.js"></script>-->
+<script type="text/javascript">
+    var orderVue = new Vue({
+        el: '#vuedata',
+        data: {
+            clinekey:'',
+            orderList:[],
+            editOrder:{},
+        }
+    });
+
+    var showmodal = function () {
+        $('#formaddress').find('input').val('');
+        $('#formaddress').find('input').val('');
+        orderVue.editOrder = {};
+        $('#indexOrderPrice').modal('show');
+    };
+    $('.form_datetime').datetimepicker({
+        //language:  'fr',
+        weekStart: 1,
+        todayBtn:  1,
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 2,
+        forceParse: 0,
+        showMeridian: 1,
+        language:  'zh-CN',
+        format:'yyyy-mm-dd hh:ii'
+    });
+    var caretuuid = function(){
+        $('input[name=clinekey]').val(uuidv1());
+    };
+    var postform = function(){
+        tools.formdata('#formaddress').then((result) => {
+            init.CkRequest('http://127.0.0.1:86/postform', 'post', result, function (result) {
+                toastr('success','操作成功');
+                setTimeout(function () {
+                    location.reload();
+                },1000);
+            }, 'blob');
+        }).catch((e) => {
+            toastr('error',e);
+        })
+    };
+    init.CkRequest('http://127.0.0.1:86/getlist', 'get',false, function (result) {
+        orderVue.orderList = result.data;
+        setTimeout(function () {
+            $('#datatable').DataTable();
+        },300)
+    });
+    function toastr(type = 'error',ms = false){
+        $.toast({
+            heading: '操作提示!',
+            text: ms,
+            position: 'top-right',
+            loaderBg: type == 'error' ? '#bf441d':(type == 'success' ? '#5ba035':(type == 'warning' ? '#da8609':'')),
+            icon: type, //error success warning
+            hideAfter: type == 'error' ? 5000:3000,
+            stack: 10
+        });
+    }
+    var Edit = function (es) {
+        var that = es.target;
+        orderVue.editOrder = orderVue.orderList[that.dataset.index];
+        $('#indexOrderPrice').modal('show');
+    }
+    var Renewal = function () {
+        toastr('error','续费暂不开放');
+    }
+</script>
+</html>
